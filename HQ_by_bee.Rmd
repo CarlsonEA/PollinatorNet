@@ -1,0 +1,88 @@
+---
+title: "Bees_HQ_network"
+output: html_document
+date: "2024-01-16"
+---
+
+```{r}
+
+
+library(tidyverse)
+
+Sec1 <- read.csv("Section1.csv")
+
+summary1 <- Sec1 %>%
+  filter(HQ>0)
+
+p <- ggplot(summary1, aes(x=Genus_bee, y=HQ)) + 
+  geom_boxplot()
+
+print(p)
+
+
+```
+
+## Monitoring Sections 1 and 2 in 2020
+
+```{r}
+
+library(tidyverse)
+
+Bees_byHQ2020 <- read.csv("2020_bees_HQ2.csv")
+
+bees_2020 <- Bees_byHQ2020 %>%
+  filter(SampleID != "None_associated", Pollen_Batch != "Post_monitoring")
+
+p <- ggplot(bees_2020, aes(x=Genus_bee, y=HQ)) + 
+  geom_boxplot()
+print(p)
+
+#get average HQ by plant 
+plants_2020 <- Bees_byHQ2020 %>% 
+  filter(SampleID != "None_associated", Pollen_Batch != "Post_monitoring") %>%
+  select(Family_plant, Genus_plant, Site, HQ, Polygon) %>%
+  group_by(Family_plant, Genus_plant) %>%
+  mutate(Avg_HQ = mean(HQ)) 
+
+print(plants_2020)
+
+plant_summary <- plants_2020 %>% 
+  group_by(Genus_plant, Family_plant) %>% 
+  filter(row_number()==1)
+
+
+bees_2020_2 <- Bees_byHQ2020 %>%
+  filter(Detected == "Yes", Pollen_Batch != "Post_monitoring")
+
+p <- ggplot(bees_2020_2, aes(x=Genus_bee, y=Avg_HQ)) + 
+  geom_boxplot()
+print(p) #AverageHQ values factored into HQ by bee
+
+p2 <- ggplot(bees_2020, aes(x=Genus_bee, y=HQ)) + 
+  geom_boxplot()
+print(p2) #Just 1-1 match HQ values only
+
+
+Osmia_2020 <- bees_2020 %>%
+  filter(Genus_bee == "Osmia")
+
+ggplot(Osmia_2020, aes(fill=Genus_plant, y = Detected, x=Detected)) + 
+    geom_bar(position="stack", stat="identity")
+
+ggplot(bees_2020, aes(fill=Genus_plant, y = Detected, x=Genus_bee)) + 
+    geom_bar(position="stack", stat="identity")
+
+
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
